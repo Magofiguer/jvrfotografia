@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model PortfolioCategory {
+  id          Int              @id @default(autoincrement())
+  slug        String           @unique
+  name        String
+  description String?
+  order       Int              @default(0)
+
+  albums      PortfolioAlbum[]
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model PortfolioAlbum {
+  id          Int               @id @default(autoincrement())
+  slug        String            @unique
+  title       String
+  description String?
+  date        DateTime?
+  coverImage  String?
+  isPublished Boolean           @default(false)
+  order       Int               @default(0)
+
+  categoryId  Int
+  category    PortfolioCategory @relation(fields: [categoryId], references: [id])
+
+  images      PortfolioImage[]
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model PortfolioImage {
+  id        Int            @id @default(autoincrement())
+  albumId   Int
+  album     PortfolioAlbum @relation(fields: [albumId], references: [id])
+  url       String
+  alt       String?
+  order     Int            @default(0)
+
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model PackageCategory {
+  id          Int        @id @default(autoincrement())
+  slug        String     @unique
+  name        String
+  description String?
+  order       Int        @default(0)
+
+  packages    Package[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Package {
+  id              Int             @id @default(autoincrement())
+  slug            String          @unique
+  title           String
+  shortDescription String?
+  description     String?
+  priceFrom       Int?
+  isActive        Boolean         @default(true)
+  order           Int             @default(0)
+
+  categoryId      Int
+  category        PackageCategory @relation(fields: [categoryId], references: [id])
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Testimonial {
+  id          Int      @id @default(autoincrement())
+  clientName  String
+  excerpt     String?
+  body        String
+  isPublished Boolean  @default(true)
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
