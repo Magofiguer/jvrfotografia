@@ -8,9 +8,9 @@ import { randomUUID } from "node:crypto";
 // GET opcional para debug
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { albumId: string } }
+  context: { params: Promise<{ albumId: string }> }
 ) {
-  const { albumId } = params;
+  const { albumId } = await context.params;
 
   return NextResponse.json({
     ok: true,
@@ -21,10 +21,10 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { albumId: string } }
+  context: { params: Promise<{ albumId: string }> }
 ) {
   try {
-    const { albumId } = params;
+    const { albumId } = await context.params;
     const albumIdNum = Number(albumId);
 
     if (!albumId || Number.isNaN(albumIdNum)) {
