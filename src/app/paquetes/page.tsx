@@ -2,16 +2,32 @@ import Link from "next/link";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { prisma } from "@/lib/prisma";
 
+// Tipamos explícitamente las categorías con sus paquetes
+type CategoryWithPackages = {
+  id: number;
+  name: string;
+  description: string | null;
+  packages: {
+    id: number;
+    title: string;
+    slug: string;
+    shortDescription: string | null;
+    priceFrom: number | null;
+    isActive: boolean;
+  }[];
+};
+
 export default async function PackagesPage() {
-  const categories = await prisma.packageCategory.findMany({
-    orderBy: [{ order: "asc" }, { name: "asc" }],
-    include: {
-      packages: {
-        where: { isActive: true },
-        orderBy: [{ order: "asc" }, { title: "asc" }],
+  const categories: CategoryWithPackages[] =
+    await prisma.packageCategory.findMany({
+      orderBy: [{ order: "asc" }, { name: "asc" }],
+      include: {
+        packages: {
+          where: { isActive: true },
+          orderBy: [{ order: "asc" }, { title: "asc" }],
+        },
       },
-    },
-  });
+    });
 
   const hasAnyActivePackage = categories.some(
     (cat) => cat.packages.length > 0
@@ -55,87 +71,65 @@ export default async function PackagesPage() {
             </div>
           ) : (
             <div className="space-y-8">
-              {categories.map(
-                (cat: {
-                  id: number;
-                  name: string;
-                  description: string | null;
-                  packages: {
-                    id: number;
-                    title: string;
-                    slug: string;
-                    shortDescription: string | null;
-                    priceFrom: number | null;
-                    isActive: boolean;
-                  }[];
-                }) =>
-                  cat.packages.length === 0 ? null : (
-                    <section key={cat.id} className="space-y-3">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <div>
-                          <h2 className="text-lg font-semibold text-slate-50">
-                            {cat.name}
-                          </h2>
-                          {cat.description && (
-                            <p className="mt-1 text-xs text-slate-300">
-                              {cat.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        {cat.packages.map(
-                          (pkg: {
-                            id: number;
-                            title: string;
-                            slug: string;
-                            shortDescription: string | null;
-                            priceFrom: number | null;
-                            isActive: boolean;
-                          }) => (
-                            <article
-                              key={pkg.id}
-                              className="group flex flex-col justify-between rounded-2xl border border-slate-700/80 bg-slate-950/70 p-4 text-sm shadow-md shadow-black/20 transition hover:border-[#C8A76A]/80 hover:shadow-lg"
-                            >
-                              <div className="space-y-2">
-                                <h3 className="text-base font-semibold text-slate-50">
-                                  {pkg.title}
-                                </h3>
-                                {pkg.shortDescription && (
-                                  <p className="text-xs text-slate-300">
-                                    {pkg.shortDescription}
-                                  </p>
-                                )}
-                              </div>
-
-                              <div className="mt-4 flex items-end justify-between gap-3 text-xs text-slate-300">
-                                <div>
-                                  {pkg.priceFrom && (
-                                    <p className="text-[13px]">
-                                      Desde{" "}
-                                      <span className="font-semibold text-[#C8A76A]">
-                                        $
-                                        {pkg.priceFrom.toLocaleString("es-MX")}
-                                      </span>
-                                      {" MXN"}
-                                    </p>
-                                  )}
-                                </div>
-
-                                <Link
-                                  href={`/paquetes/${pkg.slug}`}
-                                  className="inline-flex items-center justify-center rounded-full bg-[#C8A76A] px-4 py-1.5 text-[11px] font-semibold text-[#050814] shadow-md shadow-black/30 transition group-hover:bg-[#d3b781]"
-                                >
-                                  Ver detalles
-                                </Link>
-                              </div>
-                            </article>
-                          )
+              {categories.map((cat) =>
+                cat.packages.length === 0 ? null : (
+                  <section key={cat.id} className="space-y-3">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <div>
+                        <h2 className="text-lg font-semibold text-slate-50">
+                          {cat.name}
+                        </h2>
+                        {cat.description && (
+                          <p className="mt-1 text-xs text-slate-300">
+                            {cat.description}
+                          </p>
                         )}
                       </div>
-                    </section>
-                  )
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {cat.packages.map((pkg) => (
+                        <article
+                          key={pkg.id}
+                          className="group flex flex-col justify-between rounded-2xl border border-slate-700/80 bg-slate-950/70 p-4 text-sm shadow-md shadow-black/20 transition hover:border-[#C8A76A]/80 hover:shadow-lg"
+                        >
+                          <div className="space-y-2">
+                            <h3 className="text-base font-semibold text-slate-50">
+                              {pkg.title}
+                            </h3>
+                            {pkg.shortDescription && (
+                              <p className="text-xs text-slate-300">
+                                {pkg.shortDescription}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="mt-4 flex items-end justify-between gap-3 text-xs text-slate-300">
+                            <div>
+                              {pkg.priceFrom && (
+                                <p className="text-[13px]">
+                                  Desde{" "}
+                                  <span className="font-semibold text-[#C8A76A]">
+                                    $
+                                    {pkg.priceFrom.toLocaleString("es-MX")}
+                                  </span>
+                                  {" MXN"}
+                                </p>
+                              )}
+                            </div>
+
+                            <Link
+                              href={`/paquetes/${pkg.slug}`}
+                              className="inline-flex items-center justify-center rounded-full bg-[#C8A76A] px-4 py-1.5 text-[11px] font-semibold text-[#050814] shadow-md shadow-black/30 transition group-hover:bg-[#d3b781]"
+                            >
+                              Ver detalles
+                            </Link>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                )
               )}
             </div>
           )}
