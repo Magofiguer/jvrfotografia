@@ -75,40 +75,50 @@ export default async function AdminPackagesPage() {
               </p>
             ) : (
               <div className="flex flex-wrap gap-3">
-                {categories.map((cat) => (
-                  <div
-                    key={cat.id}
-                    className="flex flex-col justify-between gap-2 rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-3"
-                  >
-                    <div className="space-y-1">
-                      <p className="text-[11px] uppercase tracking-[0.18em] text-[#C8A76A]/90">
-                        {cat.name}
-                      </p>
-                      {cat.description && (
-                        <p className="mt-1 text-[11px] text-slate-300 line-clamp-2">
-                          {cat.description}
+                {categories.map(
+                  (cat: {
+                    id: number;
+                    name: string;
+                    description: string | null;
+                    order: number;
+                    packages: unknown[];
+                  }) => (
+                    <div
+                      key={cat.id}
+                      className="flex flex-col justify-between gap-2 rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-3"
+                    >
+                      <div className="space-y-1">
+                        <p className="text-[11px] uppercase tracking-[0.18em] text-[#C8A76A]/90">
+                          {cat.name}
                         </p>
-                      )}
-                      <p className="mt-1 text-[11px] text-slate-400">
-                        {cat.packages.length} paquetes activos
-                      </p>
-                    </div>
+                        {cat.description && (
+                          <p className="mt-1 text-[11px] text-slate-300 line-clamp-2">
+                            {cat.description}
+                          </p>
+                        )}
+                        <p className="mt-1 text-[11px] text-slate-400">
+                          {cat.packages.length} paquetes activos
+                        </p>
+                      </div>
 
-                    <div className="mt-1 flex items-center justify-between gap-2 text-[11px] text-slate-400">
-                      <span>Orden: <span className="font-mono">{cat.order}</span></span>
+                      <div className="mt-1 flex items-center justify-between gap-2 text-[11px] text-slate-400">
+                        <span>
+                          Orden: <span className="font-mono">{cat.order}</span>
+                        </span>
 
-                      <form action={deletePackageCategory}>
-                        <input type="hidden" name="categoryId" value={cat.id} />
-                        <button
-                          type="submit"
-                          className="rounded-full bg-red-500/10 px-3 py-1 text-[11px] text-red-300 border border-red-500/40 hover:bg-red-500/20 hover:text-red-100 transition"
-                        >
-                          Eliminar
-                        </button>
-                      </form>
+                        <form action={deletePackageCategory}>
+                          <input type="hidden" name="categoryId" value={cat.id} />
+                          <button
+                            type="submit"
+                            className="rounded-full bg-red-500/10 px-3 py-1 text-[11px] text-red-300 border border-red-500/40 hover:bg-red-500/20 hover:text-red-100 transition"
+                          >
+                            Eliminar
+                          </button>
+                        </form>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             )}
           </div>
