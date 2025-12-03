@@ -25,15 +25,16 @@ export default async function AdminPackagesPage() {
       <section className="bg-[#0A1A2F] py-16 text-slate-50">
         <div className="mx-auto max-w-6xl px-4 space-y-10">
           {/* Botón volver */}
-            <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4">
             <Link
-                href="/admin"
-                className="inline-flex items-center gap-2 text-xs font-medium text-slate-300 hover:text-[#C8A76A] transition"
+              href="/admin"
+              className="inline-flex items-center gap-2 text-xs font-medium text-slate-300 hover:text-[#C8A76A] transition"
             >
-                <span className="text-base">←</span>
-                <span>Volver al panel administración</span>
+              <span className="text-base">←</span>
+              <span>Volver al panel administración</span>
             </Link>
-            </div>  
+          </div>
+
           {/* Header */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-2">
@@ -103,11 +104,16 @@ export default async function AdminPackagesPage() {
 
                       <div className="mt-1 flex items-center justify-between gap-2 text-[11px] text-slate-400">
                         <span>
-                          Orden: <span className="font-mono">{cat.order}</span>
+                          Orden:{" "}
+                          <span className="font-mono">{cat.order}</span>
                         </span>
 
                         <form action={deletePackageCategory}>
-                          <input type="hidden" name="categoryId" value={cat.id} />
+                          <input
+                            type="hidden"
+                            name="categoryId"
+                            value={cat.id}
+                          />
                           <button
                             type="submit"
                             className="rounded-full bg-red-500/10 px-3 py-1 text-[11px] text-red-300 border border-red-500/40 hover:bg-red-500/20 hover:text-red-100 transition"
@@ -134,34 +140,42 @@ export default async function AdminPackagesPage() {
               </p>
             ) : (
               <div className="space-y-2">
-                {packages.map((p) => (
+                {packages.map(
+                  (p: {
+                    id: number;
+                    title: string;
+                    shortDescription: string | null;
+                    isActive: boolean;
+                    priceFrom: number | null;
+                    category: { name: string | null } | null;
+                  }) => (
                     <div
-                        key={p.id}
-                        className="flex flex-col gap-1 rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                      key={p.id}
+                      className="flex flex-col gap-1 rounded-xl border border-slate-700 bg-slate-900/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                     >
-                        <div className="space-y-1">
+                      <div className="space-y-1">
                         <p className="text-xs font-semibold text-slate-50">
-                            {p.title}
+                          {p.title}
                         </p>
                         <p className="text-[11px] text-slate-400">
-                            {p.category?.name ?? "Sin categoría"} ·{" "}
-                            {p.isActive ? "Activo" : "Inactivo"}
+                          {p.category?.name ?? "Sin categoría"} ·{" "}
+                          {p.isActive ? "Activo" : "Inactivo"}
                         </p>
                         {p.shortDescription && (
-                            <p className="text-[11px] text-slate-300 line-clamp-2">
+                          <p className="text-[11px] text-slate-300 line-clamp-2">
                             {p.shortDescription}
-                            </p>
+                          </p>
                         )}
-                        </div>
+                      </div>
 
-                        <div className="mt-2 flex items-center gap-3 text-[11px] text-slate-300 sm:mt-0">
+                      <div className="mt-2 flex items-center gap-3 text-[11px] text-slate-300 sm:mt-0">
                         {p.priceFrom && (
-                            <span>
+                          <span>
                             Desde{" "}
                             <span className="font-semibold">
-                                ${p.priceFrom.toLocaleString("es-MX")}
+                              ${p.priceFrom.toLocaleString("es-MX")}
                             </span>
-                            </span>
+                          </span>
                         )}
 
                         <Link
@@ -172,18 +186,22 @@ export default async function AdminPackagesPage() {
                         </Link>
 
                         <form method="POST" action="/admin/paquetes/delete">
-                            <input type="hidden" name="packageId" value={p.id} />
-                            <button
+                          <input
+                            type="hidden"
+                            name="packageId"
+                            value={p.id}
+                          />
+                          <button
                             type="submit"
                             className="rounded-full bg-red-500/10 px-3 py-1 text-[11px] text-red-300 border border-red-500/40 hover:bg-red-500/20 hover:text-red-200 transition"
-                            >
+                          >
                             Eliminar
-                            </button>
+                          </button>
                         </form>
-                        </div>
+                      </div>
                     </div>
-                    ))}
-
+                  )
+                )}
               </div>
             )}
           </div>
