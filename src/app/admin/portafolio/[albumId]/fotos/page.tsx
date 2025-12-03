@@ -11,7 +11,7 @@ type Props = {
 };
 
 export default async function AlbumPhotosAdminPage({ params }: Props) {
-  const { albumId } = await  params;
+  const { albumId } = params;
   const id = Number(albumId);
 
   if (Number.isNaN(id)) {
@@ -144,41 +144,48 @@ export default async function AlbumPhotosAdminPage({ params }: Props) {
                 Imágenes actuales ({album.images.length})
               </h2>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                {album.images.map((img) => (
-                  <div
-                    key={img.id}
-                    className="relative overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/70"
-                  >
-                    {/* Botón eliminar */}
-                    <form
-                      method="POST"
-                      action={`/admin/portafolio/${album.id}/fotos/delete`}
-                      className="absolute right-1 top-1 z-10"
+                {album.images.map(
+                  (img: {
+                    id: number;
+                    url: string;
+                    alt: string | null;
+                    order: number;
+                  }) => (
+                    <div
+                      key={img.id}
+                      className="relative overflow-hidden rounded-lg border border-slate-700/80 bg-slate-900/70"
                     >
-                      <input type="hidden" name="imageId" value={img.id} />
-                      <button
-                        type="submit"
-                        className="rounded-full bg-black/70 px-2 py-1 text-[10px] text-red-300 hover:bg-black hover:text-red-200"
-                        title="Eliminar esta foto"
+                      {/* Botón eliminar */}
+                      <form
+                        method="POST"
+                        action={`/admin/portafolio/${album.id}/fotos/delete`}
+                        className="absolute right-1 top-1 z-10"
                       >
-                        ✕
-                      </button>
-                    </form>
+                        <input type="hidden" name="imageId" value={img.id} />
+                        <button
+                          type="submit"
+                          className="rounded-full bg-black/70 px-2 py-1 text-[10px] text-red-300 hover:bg-black hover:text-red-200"
+                          title="Eliminar esta foto"
+                        >
+                          ✕
+                        </button>
+                      </form>
 
-                    {/* Imagen */}
-                    <img
-                      src={img.url}
-                      alt={img.alt ?? ""}
-                      className="h-32 w-full object-cover"
-                      loading="lazy"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-black/0 px-2 py-1">
-                      <p className="text-[10px] text-slate-200 truncate">
-                        #{img.order} · {img.alt ?? "Sin descripción"}
-                      </p>
+                      {/* Imagen */}
+                      <img
+                        src={img.url}
+                        alt={img.alt ?? ""}
+                        className="h-32 w-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-black/0 px-2 py-1">
+                        <p className="text-[10px] text-slate-200 truncate">
+                          #{img.order} · {img.alt ?? "Sin descripción"}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </div>
           ) : (
