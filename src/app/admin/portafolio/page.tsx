@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { prisma } from "@/lib/prisma";
-import { deletePortfolioAlbum } from "./actions"; 
+import { deletePortfolioAlbum } from "./actions";
 
 export default async function AdminPortafolioPage() {
   const albums = await prisma.portfolioAlbum.findMany({
@@ -50,55 +50,63 @@ export default async function AdminPortafolioPage() {
           {/* Listado */}
           {hasAlbums ? (
             <div className="mt-4 space-y-3">
-              {albums.map((album) => (
-                <div
-                  key={album.id}
-                  className="flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/60 px-4 py-3 text-xs sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="space-y-1">
-                    <p className="text-sm font-semibold text-slate-50">
-                      {album.title}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-slate-800/90 px-2.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-200">
-                        {album.category?.name ?? "Sin categoría"}
-                      </span>
-                      {album.date && (
-                        <span className="text-[11px] text-slate-400">
-                          {new Date(album.date).toLocaleDateString("es-MX")}
+              {albums.map(
+                (album: {
+                  id: number;
+                  title: string;
+                  category: { name: string } | null;
+                  date: Date | null;
+                  isPublished: boolean;
+                }) => (
+                  <div
+                    key={album.id}
+                    className="flex flex-col gap-2 rounded-xl border border-slate-700/80 bg-slate-900/60 px-4 py-3 text-xs sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-slate-50">
+                        {album.title}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full bg-slate-800/90 px-2.5 py-0.5 text-[10px] uppercase tracking-wide text-slate-200">
+                          {album.category?.name ?? "Sin categoría"}
                         </span>
-                      )}
-                      <span className="text-[11px] text-slate-500">
-                        {album.isPublished ? "Publicado" : "Borrador"}
-                      </span>
+                        {album.date && (
+                          <span className="text-[11px] text-slate-400">
+                            {new Date(album.date).toLocaleDateString("es-MX")}
+                          </span>
+                        )}
+                        <span className="text-[11px] text-slate-500">
+                          {album.isPublished ? "Publicado" : "Borrador"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/admin/portafolio/${album.id}/editar`}
+                        className="rounded-full border border-slate-600/80 px-3 py-1 text-[11px] text-slate-200 hover:border-[#C8A76A] hover:text-[#C8A76A] transition"
+                      >
+                        Editar
+                      </Link>
+                      <Link
+                        href={`/admin/portafolio/${album.id}/fotos`}
+                        className="rounded-full border border-slate-600/80 px-3 py-1 text-[11px] text-slate-200 hover:border-[#C8A76A] hover:text-[#C8A76A] transition"
+                      >
+                        Fotos
+                      </Link>
+                      <form action={deletePortfolioAlbum}>
+                        <input type="hidden" name="albumId" value={album.id} />
+                        <button
+                          type="submit"
+                          className="rounded-full bg-red-500/10 px-3 py-1 text-[11px] text-red-300 border border-red-500/40 hover:bg-red-500/20 hover:text-red-100 transition"
+                        >
+                          Eliminar
+                        </button>
+                      </form>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/admin/portafolio/${album.id}/editar`}
-                      className="rounded-full border border-slate-600/80 px-3 py-1 text-[11px] text-slate-200 hover:border-[#C8A76A] hover:text-[#C8A76A] transition"
-                    >
-                      Editar
-                    </Link>
-                    <Link
-                      href={`/admin/portafolio/${album.id}/fotos`}
-                      className="rounded-full border border-slate-600/80 px-3 py-1 text-[11px] text-slate-200 hover:border-[#C8A76A] hover:text-[#C8A76A] transition"
-                    >
-                      Fotos
-                    </Link>
-                    <form action={deletePortfolioAlbum}>
-                      <input type="hidden" name="albumId" value={album.id} />
-                      <button
-                        type="submit"
-                        className="rounded-full bg-red-500/10 px-3 py-1 text-[11px] text-red-300 border border-red-500/40 hover:bg-red-500/20 hover:text-red-100 transition"
-                      >
-                        Eliminar
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
           ) : (
             <div className="mt-4 rounded-2xl border border-slate-700/70 bg-slate-900/60 p-6 text-xs text-slate-300">
