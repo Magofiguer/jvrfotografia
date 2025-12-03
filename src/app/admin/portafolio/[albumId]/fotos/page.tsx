@@ -11,7 +11,7 @@ type Props = {
 };
 
 export default async function AlbumPhotosAdminPage({ params }: Props) {
-  const { albumId } = params;
+  const { albumId } = await  params;
   const id = Number(albumId);
 
   if (Number.isNaN(id)) {
