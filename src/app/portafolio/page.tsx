@@ -2,8 +2,27 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PageLayout } from "@/components/layout/PageLayout";
 
+type AlbumWithImages = {
+  id: number;
+  title: string;
+  slug: string;
+  date: Date | null;
+  description?: string | null;   // 👈 la agregamos
+  location?: string | null; // 👈 aquí el cambio
+  category: {
+    id: number;
+    name: string;
+  } | null;
+  images: {
+    id: number;
+    url: string;
+    alt: string | null;
+    order: number;
+  }[];
+};
+
 export default async function PortfolioPage() {
-  const albums = await prisma.portfolioAlbum.findMany({
+  const albums: AlbumWithImages[] = await prisma.portfolioAlbum.findMany({
     where: {
       isPublished: true,
     },
@@ -45,7 +64,7 @@ export default async function PortfolioPage() {
             </p>
           ) : (
             <div className="grid gap-6 md:grid-cols-3">
-              {albums.map((album) => {
+              {albums.map((album: AlbumWithImages) => {
                 const cover = album.images[0];
 
                 return (
