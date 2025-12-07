@@ -1,14 +1,37 @@
 import { PageLayout } from "@/components/layout/PageLayout";
 import { HeroSection } from "@/components/home/HeroSection";
-//import { PortfolioPreview } from "@/components/home/PortfolioPreview";
 import { PortfolioTeaser } from "@/components/portfolio/PortfolioTeaser";
-//import Image from "next/image";
+import { prisma } from "@/lib/prisma";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Traemos algunos álbumes recientes para el teaser
+  const albums = await prisma.portfolioAlbum.findMany({
+    where: {
+      isPublished: true,
+    },
+    include: {
+      category: {
+        select: {
+          name: true,
+        },
+      },
+      images: {
+        orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+        select: {
+          id: true,
+          url: true,
+          alt: true,
+        },
+      },
+    },
+    orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+    take: 8,
+  });
+
   return (
     <PageLayout>
       <HeroSection />
-      <PortfolioTeaser />
+      <PortfolioTeaser albums={albums} />
     </PageLayout>
   );
 }
