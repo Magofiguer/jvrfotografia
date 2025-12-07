@@ -1,79 +1,119 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import Image from "next/image";
 
-export async function PortfolioPreview() {
-  const albums = await prisma.portfolioAlbum.findMany({
-    where: { isPublished: true },
-    orderBy: { createdAt: "desc" },
-    take: 3,
-    include: {
-      category: true,
-    },
-  });
+type PortfolioPreviewAlbum = {
+  id: number;
+  slug: string;
+  title: string;
+  date: Date | string | null;
+  location?: string | null;
+  category?: {
+    name: string;
+  } | null;
+  images?: {
+    id: number;
+    url: string;
+    alt: string | null;
+  }[];
+};
 
-  const hasAlbums = albums.length > 0;
+type PortfolioPreviewProps = {
+  albums: PortfolioPreviewAlbum[];
+};
+
+export function PortfolioPreview({ albums }: PortfolioPreviewProps) {
+  if (!albums || albums.length === 0) {
+    return null;
+  }
+
+  // Nos quedamos con los primeros 4 para el home
+  const visibleAlbums = albums.slice(0, 4);
 
   return (
-    <section className="bg-white py-16 text-[#0A1A2F]">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-semibold md:text-3xl">Portafolio</h2>
-            <p className="mt-2 max-w-xl text-sm text-slate-600">
-              Una mirada rápida a las últimas historias que has fotografiado.
-              En el portafolio completo podrás explorar cada sesión con más
-              detalle.
-            </p>
-          </div>
+    <section className="border-t border-slate-200 bg-white py-16">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 md:flex-row md:items-start md:justify-between">
+        <div className="max-w-sm space-y-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+            Portafolio
+          </p>
+          <h2 className="text-2xl font-semibold text-slate-900">
+            Historias que se convierten en recuerdos.
+          </h2>
+          <p className="text-sm text-slate-600">
+            Mira algunos de los eventos recientes: XV años, bodas y sesiones
+            familiares capturadas con el estilo de JVR Fotografía.
+          </p>
+
+          <Link
+            href="/portafolio"
+            className="inline-flex items-center text-xs font-semibold text-slate-900 underline-offset-4 hover:underline"
+          >
+            Ver portafolio completo
+          </Link>
         </div>
 
-        {!hasAlbums && (
-          <p className="mt-6 text-sm text-slate-500">
-            Aún no hay álbumes publicados. Cuando agregues tus primeras
-            sesiones, aparecerán aquí las tres más recientes.
-          </p>
-        )}
+        <div className="mt-4 grid flex-1 gap-4 md:mt-0 md:grid-cols-4">
+          {visibleAlbums.map((album: PortfolioPreviewAlbum) => {
+            const cover = album.images && album.images[0];
 
-        <div className="mt-8 grid gap-4 md:grid-cols-4">
-          {albums.map((album) => (
-            <article
-              key={album.id}
-              className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:-translate-y-1 hover:shadow-md"
-            >
-              <div className="aspect-[4/5] bg-slate-200" />
-              <div className="p-4">
-                {album.category && (
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    {album.category.name}
-                  </p>
-                )}
-                <h3 className="mt-1 text-sm font-medium">{album.title}</h3>
-                {album.description && (
-                  <p className="mt-1 text-xs text-slate-600 line-clamp-3">
-                    {album.description}
-                  </p>
-                )}
-              </div>
-            </article>
-          ))}
+            return (
+              <article
+                key={album.id}
+                className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:-translate-y-1 hover:shadow-md"
+              >
+                <Link href={`/portafolio/${album.slug}`} className="block">
+                  <div className="relative aspect-[4/5] w-full overflow-hidden">
+                    {cover ? (
+                      <Image
+                        src={cover.url}
+                        alt={cover.alt ?? album.title}
+                        fill
+                        className="object-cover"
+                        sizes="(min-width: 1024px) 20vw, 50vw"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-slate-200 text-[11px] text-slate-600">
+                        Sin imagen
+                      </div>
+                    )}
+                  </div>
+                </Link>
 
-          {/* CTA como cuarta columna */}
-          <article className="flex flex-col justify-between rounded-2xl border border-dashed border-[#C8A76A]/60 bg-[#FFF9F0] p-5">
-            <div>
-              <h3 className="text-sm font-semibold text-[#0A1A2F]">
-                Ver portafolio completo
-              </h3>
-              <p className="mt-2 text-xs text-slate-700">
-                Explora todas las categorías: XV años, bodas, familias y más.
-              </p>
-            </div>
-            <Link
-              href="/portafolio"
-              className="mt-4 inline-flex items-center justify-center rounded-full bg-[#C8A76A] px-4 py-2 text-xs font-medium text-[#0A1A2F] shadow-sm"
-            >
-              Ir al portafolio
-            </Link>
-          </article>
+                <div className="flex flex-1 flex-col px-3 py-3">
+                  {album.category?.name && (
+                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      {album.category.name}
+                    </p>
+                  )}
+
+                  <h3 className="text-xs font-semibold text-slate-900 line-clamp-2">
+                    {album.title}
+                  </h3>
+
+                  {(album.date || album.location) && (
+                    <p className="mt-1 text-[11px] text-slate-500">
+                      {album.date && (
+                        <span>
+                          {new Date(album.date).toLocaleDateString("es-MX")}
+                        </span>
+                      )}
+                      {album.date && album.location && " · "}
+                      {album.location && <span>{album.location}</span>}
+                    </p>
+                  )}
+
+                  <div className="mt-auto pt-2">
+                    <Link
+                      href={`/portafolio/${album.slug}`}
+                      className="inline-flex items-center text-[11px] font-medium text-slate-900 underline-offset-4 hover:underline"
+                    >
+                      Ver galería
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>
