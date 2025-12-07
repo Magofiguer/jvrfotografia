@@ -1,94 +1,110 @@
-/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */ 
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 
-export async function PortfolioTeaser() {
-  const albums = await prisma.portfolioAlbum.findMany({
-    where: { isPublished: true },
-    orderBy: [
-      { date: "desc" },
-      { createdAt: "desc" },
-    ],
-    take: 3,
-    include: {
-      images: {
-        take: 1,
-        orderBy: [{ order: "asc" }, { createdAt: "asc" }],
-      },
-      category: true,
-    },
-  });
+type PortfolioTeaserAlbum = {
+  id: number;
+  slug: string;
+  title: string;
+  date: Date | string | null;
+  location?: string | null;
+  category: {
+    name: string;
+  } | null;
+  images: {
+    id: number;
+    url: string;
+    alt: string | null;
+  }[];
+};
 
-  if (albums.length === 0) {
+type PortfolioTeaserProps = {
+  albums: PortfolioTeaserAlbum[];
+};
+
+export default function PortfolioTeaser({ albums }: PortfolioTeaserProps) {
+  if (!albums || albums.length === 0) {
     return null;
   }
 
   return (
-    <section className="bg-[#0A1A2F] py-16 text-slate-50">
-      <div className="mx-auto max-w-6xl px-4 space-y-8">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-2">
-            <p className="text-[11px] uppercase tracking-[0.25em] text-[#C8A76A]/80">
-              Portafolio reciente
+    <section className="bg-slate-50 py-16">
+      <div className="mx-auto max-w-6xl px-4">
+        <header className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">
+              Portafolio
             </p>
-            <h2 className="text-xl font-semibold">
-              Algunas historias recientes que Javier ha contado.
+            <h2 className="text-2xl font-semibold text-slate-900">
+              Algunas historias recientes
             </h2>
-            <p className="text-xs text-slate-300 max-w-xl">
-              Cada sesión se construye con respeto, cercanía y una dirección
-              suave. Aquí puedes ver una muestra antes de agendar la tuya.
+            <p className="mt-1 text-sm text-slate-500 max-w-xl">
+              Mira una muestra de sesiones de XV años, bodas y retratos que he
+              fotografiado recientemente.
             </p>
           </div>
 
-          <Link
-            href="/portafolio"
-            className="inline-flex items-center justify-center rounded-full border border-[#C8A76A]/70 px-4 py-2 text-[11px] font-semibold text-[#C8A76A] hover:bg-[#C8A76A]/10 transition"
-          >
-            Ver portafolio completo →
-          </Link>
-        </div>
+          <div className="mt-3 md:mt-0">
+            <Link
+              href="/portafolio"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-xs font-medium text-slate-700 hover:border-slate-900 hover:text-slate-900 transition"
+            >
+              Ver todo el portafolio
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </header>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="mt-8 grid gap-4 md:grid-cols-4">
           {albums.map((album) => {
             const cover = album.images[0];
 
             return (
-              <Link
+              <article
                 key={album.id}
-                href={`/portafolio/${album.slug}`}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70 hover:border-[#C8A76A]/80 hover:bg-slate-900/80 transition"
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 transition hover:-translate-y-1 hover:shadow-md"
               >
-                <div className="relative aspect-[4/3] overflow-hidden bg-slate-900">
-                  {cover ? (
+                {cover && (
+                  <div className="relative h-48 w-full overflow-hidden">
                     <img
                       src={cover.url}
                       alt={cover.alt ?? album.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="h-full w-full object-cover"
                       loading="lazy"
                     />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[11px] text-slate-500">
-                      Sin imagen de portada
-                    </div>
-                  )}
-                  {album.category && (
-                    <span className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-100">
-                      {album.category.name}
-                    </span>
-                  )}
-                </div>
+                  </div>
+                )}
 
-                <div className="flex flex-1 flex-col gap-1 px-4 py-4 text-xs">
-                  <p className="text-sm font-semibold text-slate-50">
-                    {album.title}
+                <div className="space-y-1 px-4 py-3">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500 line-clamp-1">
+                    {album.category?.name ?? "Sesión fotográfica"}
                   </p>
+                  <h3 className="text-sm font-semibold text-slate-900 line-clamp-2">
+                    {album.title}
+                  </h3>
+
+                  {album.location && (
+                    <p className="text-[11px] text-slate-500">
+                      {album.location}
+                    </p>
+                  )}
+
                   {album.date && (
                     <p className="text-[11px] text-slate-400">
                       {new Date(album.date).toLocaleDateString("es-MX")}
                     </p>
                   )}
                 </div>
-              </Link>
+
+                <div className="px-4 pb-3 pt-1">
+                  <Link
+                    href={`/portafolio/${album.slug}`}
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-800 hover:text-slate-950"
+                  >
+                    Ver álbum completo
+                    <span aria-hidden>→</span>
+                  </Link>
+                </div>
+              </article>
             );
           })}
         </div>
